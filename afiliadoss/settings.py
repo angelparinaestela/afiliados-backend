@@ -1,15 +1,15 @@
 import os
 from pathlib import Path
+import dj_database_url  # ✅ Asegúrate de tenerlo en requirements.txt
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = "django-insecure-cambiame-a-tu-clave-segura"
+# 🔐 Configuración segura para producción
+SECRET_KEY = os.environ.get('SECRET_KEY', 'clave-insegura-en-desarrollo')
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost').split(',')
 
-DEBUG = True
-
-ALLOWED_HOSTS = ['*']  # Solo para desarrollo
-
-# Aplicaciones instaladas
+# ✅ Aplicaciones instaladas
 INSTALLED_APPS = [
     'usuarios.apps.UsuariosConfig',  
     'corsheaders',
@@ -19,12 +19,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
-    # Apps propias
     'tareas',
     'admin_api',
-
-    # REST y JWT
     'rest_framework',
     'rest_framework_simplejwt',
 ]
@@ -40,7 +36,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-CORS_ALLOW_ALL_ORIGINS = True  # Solo para desarrollo
+CORS_ALLOW_ALL_ORIGINS = True  # Solo en desarrollo
 
 ROOT_URLCONF = 'afiliados.urls'
 
@@ -62,39 +58,37 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'afiliados.wsgi.application'
 
-# Base de datos SQLite (puedes cambiar a MySQL o PostgreSQL)
+# 🔄 Base de datos: PostgreSQL si hay DATABASE_URL, sino SQLite local
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default=f'sqlite:///{BASE_DIR / "db.sqlite3"}',
+        conn_max_age=600
+    )
 }
 
 # Usuario personalizado
 AUTH_USER_MODEL = 'usuarios.Usuario'
 
-# JWT y autenticación
+# 🔐 Autenticación
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     )
 }
 
-AUTH_PASSWORD_VALIDATORS = []  # En desarrollo, puedes desactivarlos
+AUTH_PASSWORD_VALIDATORS = []  # Producción: aquí deberías activarlos luego
 
-# Zona horaria y localización
+# 🌎 Zona horaria y localización
 LANGUAGE_CODE = 'es-pe'
 TIME_ZONE = 'America/Lima'
 USE_I18N = True
 USE_TZ = True
 
-# Archivos estáticos
+# Archivos estáticos y media
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Para producción
 
-# Archivos multimedia (para imágenes subidas)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-DEBUG = True
