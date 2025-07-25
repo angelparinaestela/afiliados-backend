@@ -1,1 +1,0 @@
-# __init__.py - Placeholder for backend/afiliados
