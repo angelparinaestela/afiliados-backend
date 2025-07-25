@@ -1,1 +1,1 @@
-web: gunicorn afiliados.wsgi
+web: cd afiliados && gunicorn afiliados.wsgi
